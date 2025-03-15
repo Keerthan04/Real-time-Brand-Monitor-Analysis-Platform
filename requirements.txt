@@ -3,3 +3,10 @@ python-dotenv
 kafka-python
 json
 pyspark
+flask
+pickle
+tensorflow
+nltk
+requests
+re
+google-genai
