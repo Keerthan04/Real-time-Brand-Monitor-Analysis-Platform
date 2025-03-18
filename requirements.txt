@@ -10,3 +10,4 @@ nltk
 requests
 re
 google-genai
+hdfs

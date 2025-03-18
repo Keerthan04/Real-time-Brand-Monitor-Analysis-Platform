@@ -68,6 +68,20 @@ def clean_markdown_json(text):
 
 @app.route('/predict',methods = ['POST'])
 def predict():
+    """
+    Endpoint to predict sentiment and extract key topics from given text.
+
+    Parameters:
+
+        text (str): The text to analyze.
+
+    Returns:
+
+        dict: A dictionary containing the predicted sentiment (int, -1 to 1),
+        the sentiment class (str, 'Negative', 'Neutral', or 'Positive'),
+        the raw prediction (list of float), and the extracted topics (list of dict).
+
+    """
     data = request.get_json(force=True)
     text = data.get('text')
     cleaned_text = clean_text(text)

@@ -45,6 +45,6 @@ for submission in subreddits.stream.submissions():
         producer.send(topic, data)
         print(f"Sent submission {submission.id} to topic: {topic}")
     
-    # For demo purposes, process only the first submission.
-    break
+    # # For demo purposes, process only the first submission.
+    # break
 producer.flush()
