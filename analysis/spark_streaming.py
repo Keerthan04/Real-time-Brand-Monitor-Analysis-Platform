@@ -49,7 +49,13 @@ api_udf = udf(call_flask_api, StringType())
 df_enriched = df_json.withColumn("analysis", api_udf(col("content")))
 
 # Write the enriched data to HDFS in Parquet format
-hdfs_output_path = "hdfs://localhost:9870/user/project/storage"
+# hdfs_output_path = "hdfs://localhost:9870/user/project/storage"
+# hdfs_output_path = "hdfs://master:9000/user/project/storage"
+# hdfs_output_path = "hdfs://localhost:9000/user/project/storage"
+hdfs_output_path = "hdfs://172.21.0.2:9866/user/project/storage"
+
+
+
 query_hdfs = df_enriched.writeStream \
     .format("parquet") \
     .option("checkpointLocation", "/user/project/checkpoint") \

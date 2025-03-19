@@ -1,0 +1,44 @@
+/user/project/storage -> storage of output of spark streaming
+/user/project/checkpoint -> checkpoint for spark streaming
+/user/project/kafka_checkpoint ->checkpoint for kafka
+
+hdfs dfs -mkdir /user/project
+hdfs dfs -mkdir /user/project/storage
+hdfs dfs -mkdir /user/project/checkpoint
+hdfs dfs -mkdir /user/project/kafka_checkpoint
+
+input topics of kakfa
+apple_topic,samsung_topic
+
+output topics of kafka
+realtime_data
+
+echo "export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop" >> ~/.bashrc
+
+
+spark streaming running command
+
+spark-submit \
+  --conf "spark.driver.extraJavaOptions=-Dipc.maximum.data.length=67108864" \
+  --conf "spark.executor.extraJavaOptions=-Dipc.maximum.data.length=67108864" \
+  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1 \
+  /workdir/spark_streaming.py
+
+spark-submit \
+  --conf "spark.driver.extraJavaOptions=-Dipc.maximum.data.length=67108864" \
+  --conf "spark.executor.extraJavaOptions=-Dipc.maximum.data.length=67108864" \
+  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1 \
+  "C:\Users\User\OneDrive\Desktop\bda_lab_project\analysis\spark_streaming.py"
+
+spark-submit \
+  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1 \
+  "C:\Users\User\OneDrive\Desktop\bda_lab_project\analysis\spark_streaming.py"
+
+spark-submit \
+  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1 \
+  /workdir/spark_streaming.py
+
+spark-submit \
+  --conf "spark.hadoop.ipc.maximum.data.length=134217728" \
+  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1 \
+  /workdir/spark_streaming.py
