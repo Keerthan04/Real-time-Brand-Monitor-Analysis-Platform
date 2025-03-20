@@ -2,6 +2,7 @@
 /user/project/checkpoint -> checkpoint for spark streaming
 /user/project/kafka_checkpoint ->checkpoint for kafka
 
+pip install requests
 hdfs dfs -mkdir /user/project
 hdfs dfs -mkdir /user/project/storage
 hdfs dfs -mkdir /user/project/checkpoint

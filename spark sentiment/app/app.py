@@ -10,7 +10,7 @@ nltk.download('wordnet')
 nltk.download('punkt_tab')
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-from google import genai
+import google.generativeai as genai
 from dotenv import load_dotenv
 import json
 import os
@@ -22,9 +22,9 @@ load_dotenv()
 
 app = Flask(__name__)
 
-model = tf.keras.models.load_model('./best_sentiment_model.h5')
+model = tf.keras.models.load_model('/flask_app/app/best_sentiment_model.h5')
 
-with open('./tokenizer.pickle', 'rb') as handle:
+with open('/flask_app/app/tokenizer.pickle', 'rb') as handle:
     tokenizer = pickle.load(handle)
 
 # Define parameters for tokenization and padding
@@ -100,7 +100,8 @@ def predict():
 
 
     ## Initialize the Google AI client
-    ai_client = genai.Client(api_key=os.getenv('GENAI_API_KEY'))
+    genai.configure(api_key = os.getenv('GENAI_API_KEY'))
+    # ai_client = genai.Client(api_key=os.getenv('GENAI_API_KEY'))
     prompt = f"""
     Given the following text: "{text}"
 
@@ -118,10 +119,8 @@ def predict():
 
     If the text does not contain clear topics, return an empty JSON array.
     """
-    response = ai_client.models.generate_content(
-        model = 'gemini-2.0-flash',
-        contents = prompt,
-    )
+    ai_model = genai.GenerativeModel('gemini-2.0-flash')
+    response = ai_model.generate_content(prompt)
     cleaned_topics = clean_markdown_json(response.text)
     try:
         topics = json.loads(cleaned_topics)
@@ -139,4 +138,4 @@ def predict():
     })
 
 if __name__ == '__main__':
-    app.run(port=5000,debug=True)
+    app.run(host='0.0.0.0',port=5000,debug=True)

@@ -1,32 +1,52 @@
 version: "3"
 
 services:
-    zookeeper:
-        image: zookeeper
-        container_name: zookeeper
-        ports:
-            - "2181:2181"
+  master:
+    container_name: master
+    image: ghcr.io/dhzdhd/hadoop-docker-compose:v1.2.5
+    ports:
+      - 8088:8088
+      - 9000:9000
+      - 9870:9870
+      - 4040:4040
+      - 9866:9866
+      # Note: Port 9092 is used by Kafka so consider removing it here unless needed
+    volumes:
+      - ./workdir:/workdir
 
-    kafka:
-        image: confluentinc/cp-kafka
-        depends_on:
-            - zookeeper
-        ports:
-            - "9092:9092"
-        expose:
-            - "29092"
-        environment:
-            KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-            KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
-            KAFKA_MIN_INSYNC_REPLICAS: "1"
+  zookeeper:
+    image: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
 
-    kafka-ui:
-        container_name: kafka-ui
-        image: provectuslabs/kafka-ui
-        ports:
-            - 8080:8080
-        environment:
-            DYNAMIC_CONFIG_ENABLED: true
+  kafka:
+    image: confluentinc/cp-kafka
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"   # This maps Kafka's host port for client connectivity
+    expose:
+      - "29092"       # Internal port for container-to-container communication
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_MIN_INSYNC_REPLICAS: "1"
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      DYNAMIC_CONFIG_ENABLED: true
+
+  sentimenet-flask:
+    container_name: sentiment-flask
+    image: sentiment-flask-app
+    ports:
+      - "5000:5000"

@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from kafka_producer import producer
+import time
 #documentation link->https://praw.readthedocs.io/en/stable/code_overview/models/submission.html#submission
 
 # Load variables from the .env file
@@ -45,6 +46,8 @@ for submission in subreddits.stream.submissions():
         producer.send(topic, data)
         print(f"Sent submission {submission.id} to topic: {topic}")
     
+    # Sleep for a short duration to avoid rate limiting.
+    time.sleep(5)
     # # For demo purposes, process only the first submission.
     # break
 producer.flush()

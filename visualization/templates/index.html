@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Real-Time Sentiment Visualization</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.0/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", function() {
+        var socket = io();
+
+        // Sentiment counts for Apple and Samsung
+        var appleSentimentData = {positive: 0, negative: 0};
+        var samsungSentimentData = {positive: 0, negative: 0};
+
+        // Topic sentiment data for Apple and Samsung
+        var appleTopicData = {};
+        var samsungTopicData = {};
+
+        // Setup the charts
+        var sentimentChart = new Chart(document.getElementById('sentiment-chart').getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: ['Positive', 'Negative'],
+            datasets: [{
+              label: 'Apple Sentiment',
+              data: [0, 0],  // Placeholder values, will be updated by the socket
+              backgroundColor: 'rgba(0, 123, 255, 0.7)'
+            }, {
+              label: 'Samsung Sentiment',
+              data: [0, 0],  // Placeholder values, will be updated by the socket
+              backgroundColor: 'rgba(255, 99, 132, 0.7)'
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: { beginAtZero: true }
+            }
+          }
+        });
+
+        var topicChart = new Chart(document.getElementById('topic-chart').getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: [],  // Will dynamically update with topics
+            datasets: [{
+              label: 'Apple Topic Sentiment',
+              data: [],  // Will dynamically update with sentiment counts
+              backgroundColor: 'rgba(0, 123, 255, 0.7)'
+            }, {
+              label: 'Samsung Topic Sentiment',
+              data: [],  // Will dynamically update with sentiment counts
+              backgroundColor: 'rgba(255, 99, 132, 0.7)'
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: { beginAtZero: true }
+            }
+          }
+        });
+
+        // Listen for updates from Flask
+        socket.on('update_sentiment_data', function(data) {
+          // Update sentiment counts for Apple and Samsung
+          appleSentimentData = data.apple_sentiment_counts;
+          samsungSentimentData = data.samsung_sentiment_counts;
+
+          sentimentChart.data.datasets[0].data = [appleSentimentData['Positive'] || 0, appleSentimentData['Negative'] || 0];
+          sentimentChart.data.datasets[1].data = [samsungSentimentData['Positive'] || 0, samsungSentimentData['Negative'] || 0];
+          sentimentChart.update();
+
+          // Update topic sentiment data for Apple and Samsung
+          appleTopicData = data.apple_topic_sentiments;
+          samsungTopicData = data.samsung_topic_sentiments;
+
+          // Update topic chart labels and data
+          var appleTopics = Object.keys(appleTopicData);
+          var samsungTopics = Object.keys(samsungTopicData);
+          
+          topicChart.data.labels = Array.from(new Set([...appleTopics, ...samsungTopics]));
+          
+          var appleTopicSentiments = appleTopics.map(function(topic) {
+            return appleTopicData[topic]['positive'] || 0;
+          });
+          var samsungTopicSentiments = samsungTopics.map(function(topic) {
+            return samsungTopicData[topic]['positive'] || 0;
+          });
+
+          topicChart.data.datasets[0].data = appleTopicSentiments;
+          topicChart.data.datasets[1].data = samsungTopicSentiments;
+          topicChart.update();
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <h1>Real-Time Sentiment Visualization</h1>
+    <div>
+      <canvas id="sentiment-chart" width="400" height="200"></canvas>
+    </div>
+    <div>
+      <canvas id="topic-chart" width="400" height="200"></canvas>
+    </div>
+  </body>
+</html>

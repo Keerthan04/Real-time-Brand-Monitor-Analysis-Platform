@@ -1,9 +1,10 @@
+#this consumer will listen to the realtime data coming after the analysis and print the messages for us to see
 from kafka import KafkaConsumer
 import json
 
 # Create a Kafka consumer that subscribes to both topics.
 consumer = KafkaConsumer(
-    'apple_topic', 'samsung_topic',       # List your topics here
+    'realtime_data',       # List your topics here
     bootstrap_servers='localhost:9092',   # Kafka broker address
     auto_offset_reset='earliest',         # Start reading from the beginning
     enable_auto_commit=True,              # Automatically commit offsets
@@ -17,4 +18,3 @@ print("Consumer is listening for messages...")
 for message in consumer:
     print(f"Received message from topic '{message.topic}': {message.value}")
 
-#testing purposes
