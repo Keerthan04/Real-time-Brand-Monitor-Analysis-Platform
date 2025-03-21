@@ -10,13 +10,14 @@ nltk.download('wordnet')
 nltk.download('punkt_tab')
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-import google.generativeai as genai
+# import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 import json
 import os
 
 load_dotenv()
-
+#TODO -> changed the genai to the google(genai is the main client one and the generativeai is the cloud one)
 
 
 
@@ -100,8 +101,8 @@ def predict():
 
 
     ## Initialize the Google AI client
-    genai.configure(api_key = os.getenv('GENAI_API_KEY'))
-    # ai_client = genai.Client(api_key=os.getenv('GENAI_API_KEY'))
+    # genai.configure(api_key = os.getenv('GENAI_API_KEY'))
+    ai_client = genai.Client(api_key=os.getenv('GENAI_API_KEY'))
     prompt = f"""
     Given the following text: "{text}"
 
@@ -119,8 +120,12 @@ def predict():
 
     If the text does not contain clear topics, return an empty JSON array.
     """
-    ai_model = genai.GenerativeModel('gemini-2.0-flash')
-    response = ai_model.generate_content(prompt)
+    # ai_model = genai.GenerativeModel('gemini-2.0-flash')
+    # response = ai_model.generate_content(prompt)
+    response = ai_client.models.generate_content(
+        model = "gemini-2.0-flash",
+        contents=prompt
+    )
     cleaned_topics = clean_markdown_json(response.text)
     try:
         topics = json.loads(cleaned_topics)

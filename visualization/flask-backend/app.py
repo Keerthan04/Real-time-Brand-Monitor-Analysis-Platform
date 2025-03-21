@@ -7,7 +7,7 @@ from collections import defaultdict
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins="*")#for development only
 
 # Initialize dictionaries to track sentiment counts for each brand and topic
 apple_sentiment_counts = defaultdict(int)
@@ -31,8 +31,13 @@ def kafka_consumer_thread():
 
         brand = data.get('brand', '')
         sentiment = data.get('sentiment_class', '')
-        topics = data.get('topics', [])
-
+        topics_str = data.get('topics', [])
+        try:
+            print("loading the topics in json")
+            topics = json.loads(topics_str)
+        except json.JSONDecodeError:
+            print("Error loading topics from JSON")
+            topics = []
         # Update sentiment counts for Apple or Samsung
         if brand.lower() == "apple":
             apple_sentiment_counts[sentiment] += 1
@@ -42,15 +47,21 @@ def kafka_consumer_thread():
             samsung_sentiment_counts[sentiment] += 1
             for topic in topics:
                 samsung_topic_sentiments[topic['topic']][topic['sentiment']] += 1
-
+        print("the data has been loaded successfully")
         # Emit the updated data to all connected SocketIO clients
+        # socketio.emit('update_sentiment_data', {
+        #     'apple_sentiment_counts': dict(apple_sentiment_counts),
+        #     'samsung_sentiment_counts': dict(samsung_sentiment_counts),
+        #     'apple_topic_sentiments': dict(apple_topic_sentiments),
+        #     'samsung_topic_sentiments': dict(samsung_topic_sentiments)
+        # })
+        print("emitting the data")
         socketio.emit('update_sentiment_data', {
             'apple_sentiment_counts': dict(apple_sentiment_counts),
             'samsung_sentiment_counts': dict(samsung_sentiment_counts),
             'apple_topic_sentiments': dict(apple_topic_sentiments),
             'samsung_topic_sentiments': dict(samsung_topic_sentiments)
-        })
-
+        }, callback=lambda: print("Message delivered successfully"))
 # Start Kafka consumer in a background thread
 def start_kafka_consumer():
     thread = threading.Thread(target=kafka_consumer_thread)

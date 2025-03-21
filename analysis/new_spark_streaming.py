@@ -8,8 +8,8 @@ from datetime import datetime
 
 # Initialize Spark session with proper configurations
 spark = SparkSession.builder \
-    .appName("RedditSentimentAnalysis") \
-    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0") \
+    .appName("BrandMonitorAnalysis") \
+    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1") \
     .config("spark.sql.streaming.checkpointLocation", "/user/project/checkpoint") \
     .config("spark.sql.parquet.compression.codec", "snappy") \
     .getOrCreate()
@@ -26,8 +26,8 @@ json_schema = StructType([
     StructField("subreddit", StringType()),
     StructField("url", StringType()),
     StructField("content", StringType()),
-    StructField("created_utc", TimestampType()),
-    StructField("author", StringType())
+    # StructField("created_utc", TimestampType()),
+    # StructField("author", StringType())
 ])
 
 # Read stream from Kafka
@@ -44,14 +44,21 @@ parsed_df = raw_df \
     .selectExpr("CAST(value AS STRING)", "topic") \
     .select(from_json(col("value"), json_schema).alias("data"), col("topic")) \
     .select("data.*", "topic")
-
+'''
+from the sentiment-flask:5000/predict API, we get a JSON response with the following structure:
+{
+    "sentiment_class": "Neutral | Positive | Negative",
+    "sentiment": 0 for Neutral, 1 for Positive, -1 for Negative,
+    "topics": [] | [{"topic": "string", "sentiment": "positive/negative/neutral", "mention_count": integer}, ...]
+}
+'''
 # Define a UDF that calls the Flask API for sentiment analysis
 def get_sentiment_analysis(text):
     try:
         if not text or text.strip() == "":
             return json.dumps({
-                "sentiment": "neutral",
-                "sentiment_score": 0.0,
+                "sentiment_class": "Neutral",
+                "sentiment": 0,
                 "topics": []
             })
             
@@ -67,15 +74,15 @@ def get_sentiment_analysis(text):
         else:
             print(f"API Error: Status {response.status_code}")
             return json.dumps({
-                "sentiment": "neutral",
-                "sentiment_score": 0.0,
+                "sentiment_class": "Neutral",
+                "sentiment": 0,
                 "topics": []
             })
     except Exception as e:
         print(f"Error calling sentiment API: {str(e)}")
         return json.dumps({
-            "sentiment": "neutral",
-            "sentiment_score": 0.0,
+            "sentiment_class": "Neutral",
+            "sentiment": 0,
             "topics": []
         })
 
@@ -87,8 +94,8 @@ df_with_sentiment = parsed_df.withColumn("analysis_json", sentiment_udf(col("con
 
 # Extract fields from the JSON analysis result
 analysis_schema = StructType([
-    StructField("sentiment", StringType()),
-    StructField("sentiment_score", FloatType()),
+    StructField("sentiment_class", StringType()),
+    StructField("sentiment", FloatType()),
     StructField("topics", StringType())
 ])
 
@@ -97,8 +104,8 @@ df_enriched = df_with_sentiment \
     .withColumn("analysis", from_json(col("analysis_json"), analysis_schema)) \
     .select(
         "*",
+        col("analysis.sentiment_class").alias("sentiment_class"),
         col("analysis.sentiment").alias("sentiment"),
-        col("analysis.sentiment_score").alias("sentiment_score"),
         col("analysis.topics").alias("topics")
     ) \
     .drop("analysis", "analysis_json")
@@ -164,8 +171,8 @@ kafka_df = df_final.select(
         col("subreddit"),
         col("url"),
         col("content").alias("text"),
+        col("sentiment_class"),
         col("sentiment"),
-        col("sentiment_score"),
         col("topics"),
         col("brand"),
         col("processed_timestamp")

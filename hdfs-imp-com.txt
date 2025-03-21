@@ -48,13 +48,31 @@ spark-submit \
 For new spark streaming file
 spark-submit \
   --master local[*] \
-  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0 \
+  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1 \
   --conf "spark.executor.memory=2g" \
   --conf "spark.driver.memory=2g" \
-  /path/to/script.py
+  /workdir/new_spark_streaming.py
 
-hadoop fs -mkdir -p /user/project/storage
-hadoop fs -mkdir -p /user/project/checkpoint
-hadoop fs -mkdir -p /user/project/hdfs_checkpoint
-hadoop fs -mkdir -p /user/project/kafka_checkpoint
-hadoop fs -chmod -R 777 /user/project
+hdfs dfs -mkdir -p /user/project/
+hdfs dfs -mkdir -p /user/project/storage
+hdfs dfs -mkdir -p /user/project/checkpoint
+hdfs dfs -mkdir -p /user/project/hdfs_checkpoint
+hdfs dfs -mkdir -p /user/project/kafka_checkpoint
+hdfs dfs -chmod -R 777 /user/project
+
+
+data
+{'id': '1jezba4', 'title': "Commission provides guidance under Digital Markets Act to facilitate development of innovative products on Apple's platforms", 'score': 99, 'subreddit': 'apple', 'sentiment_class': 'Positive', 'sentiment': 1.0, 'topics': '[{"mention_count":1,"sentiment":"positive","topic":"Development of innovative products on Apple\'s platforms"}]', 'brand': 'Apple'}
+
+
+Proper command to run the spark submit job and to write to hdfs also is this 
+spark-submit \
+  --master local[*] \
+  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1 \
+  --conf "spark.executor.memory=2g" \
+  --conf "spark.driver.memory=2g" \
+  --conf "spark.hadoop.fs.defaultFS=hdfs://master:9000" \
+  --conf "spark.hadoop.dfs.client.use.datanode.hostname=true" \
+  /workdir/rate-limiting_streaming.py
+
+#the defaultFS location and all is important to write the data

@@ -6,7 +6,16 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="text/javascript">
       document.addEventListener("DOMContentLoaded", function() {
-        var socket = io();
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        console.log('Socket.IO attempting connection to:', 'http://' + document.domain + ':' + location.port);
+
+        socket.on('connect', function() {
+            console.log('Socket.IO connected successfully');
+        });
+
+        socket.on('connect_error', function(error) {
+            console.error('Socket.IO connection error:', error);
+        });
 
         // Sentiment counts for Apple and Samsung
         var appleSentimentData = {positive: 0, negative: 0};
@@ -63,12 +72,21 @@
 
         // Listen for updates from Flask
         socket.on('update_sentiment_data', function(data) {
+          console.log('Received update_sentiment_data with:', data);
+          console.log('Apple sentiment counts:', data.apple_sentiment_counts);
+          console.log('Chart data before update:', sentimentChart.data.datasets[0].data);
           // Update sentiment counts for Apple and Samsung
           appleSentimentData = data.apple_sentiment_counts;
           samsungSentimentData = data.samsung_sentiment_counts;
 
-          sentimentChart.data.datasets[0].data = [appleSentimentData['Positive'] || 0, appleSentimentData['Negative'] || 0];
-          sentimentChart.data.datasets[1].data = [samsungSentimentData['Positive'] || 0, samsungSentimentData['Negative'] || 0];
+          sentimentChart.data.datasets[0].data = [
+              appleSentimentData['Positive'] || appleSentimentData['positive'] || 0,
+              appleSentimentData['Negative'] || appleSentimentData['negative'] || 0
+          ];
+          sentimentChart.data.datasets[1].data = [
+              appleSentimentData['Positive'] || appleSentimentData['positive'] || 0,
+              appleSentimentData['Negative'] || appleSentimentData['negative'] || 0
+          ];
           sentimentChart.update();
 
           // Update topic sentiment data for Apple and Samsung
@@ -91,6 +109,8 @@
           topicChart.data.datasets[0].data = appleTopicSentiments;
           topicChart.data.datasets[1].data = samsungTopicSentiments;
           topicChart.update();
+          console.log('Chart data after update:', sentimentChart.data.datasets[0].data);
+          console.log('Chart update called');
         });
       });
     </script>
