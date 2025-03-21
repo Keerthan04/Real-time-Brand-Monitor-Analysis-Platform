@@ -43,3 +43,18 @@ spark-submit \
   --conf "spark.hadoop.ipc.maximum.data.length=134217728" \
   --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1 \
   /workdir/spark_streaming.py
+
+
+For new spark streaming file
+spark-submit \
+  --master local[*] \
+  --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0 \
+  --conf "spark.executor.memory=2g" \
+  --conf "spark.driver.memory=2g" \
+  /path/to/script.py
+
+hadoop fs -mkdir -p /user/project/storage
+hadoop fs -mkdir -p /user/project/checkpoint
+hadoop fs -mkdir -p /user/project/hdfs_checkpoint
+hadoop fs -mkdir -p /user/project/kafka_checkpoint
+hadoop fs -chmod -R 777 /user/project
