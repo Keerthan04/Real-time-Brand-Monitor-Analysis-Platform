@@ -90,7 +90,7 @@ The dashboard provides interactive visualizations of sentiment analysis results:
 ### Step 1: Clone the Repository
 
 ```bash
-git clone <https://github.com/Keerthan04/brand_monitor_bda_lab>
+git clone https://github.com/Keerthan04/Real-time-Brand-Monitor-Analysis-Platform
 ```
 
 ### Step 2: Set Up Hadoop Docker Environment
