@@ -1,4 +1,0 @@
-flask
-flask-socketio
-kafka-python
-eventlet
