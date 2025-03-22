@@ -48,18 +48,30 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+// const randomData: chartData[] = Array.from({ length: 30 }, (_, index) => {
+//   const date = new Date();
+//   date.setDate(date.getDate() - index);
+//   return {
+//     date: date.toISOString().split('T')[0],
+//     positive: Math.floor(Math.random() * 100),
+//     negative: Math.floor(Math.random() * 100),
+//     neutral: Math.floor(Math.random() * 100),
+//   };
+// });
+
+
 export function SentimentChart({data,title}: {data: chartData[],title: string}) {
   // const [timeRange, setTimeRange] = React.useState("90d");
 
   const filteredData = data;
 
   return (
-    <Card>
+    <Card className="mx-4">
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1 text-center sm:text-left">
           <CardTitle>{title}</CardTitle>
           <CardDescription>
-            Area chart showing Positive, Neutral, Negative
+            Area chart showing Positive, Neutral, Negative sentiment counts of topics in realtime
           </CardDescription>
         </div>
       </CardHeader>
