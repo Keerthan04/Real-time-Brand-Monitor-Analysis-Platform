@@ -6,6 +6,20 @@ This project implements a comprehensive real-time data analytics pipeline for so
 
 The platform enables brand strategists to monitor public sentiment, track topic trends, and make data-driven marketing decisions based on real-time social media feedback.
 
+## Architecture
+
+### Architecture Diagram
+
+![BDA Architecture](/assets/BDAmainArch.png)
+
+The architecture consists of several key components:
+
+- **Data Source**: Reddit API for streaming posts
+- **Message Broker**: Kafka for handling real-time data streams
+- **Processing Engine**: Spark for sentiment analysis and data transformations along with Built flask API
+- **Storage**: HDFS for persistent data storage
+- **Visualization**: React frontend with Express backend for real-time dashboards
+
 ## Project Working
 
 The Real-time Brand Monitor Analysis Platform works through a sophisticated pipeline that processes social media data from collection to visualization:
@@ -32,15 +46,19 @@ The Real-time Brand Monitor Analysis Platform works through a sophisticated pipe
      - Topic extraction to identify key discussion themes.
      - Brand mention detection.
      - Metadata enrichment.
+     - The above functions are rate-limited to 5 messages per batch and 1 second between API calls and are got from api calls to the sentiment-flask-app api container built using flask which consists of pre-built LSTM model from reddit data and Structured output LLM.
+     - Then sends the Data for visualization into 2 Kafka topics: `realtime_data_apple` and `realtime_data_samsung`.
 
 4. **Data Storage**
 
    - Processed results are stored in HDFS at `/user/project/storage`.
    - The data is organized in Parquet format for efficient retrieval.
+   - The data stored in HDFS can be used for analysis and visualization at a later date.
    - Checkpoint information is maintained at `/user/project/kafka_checkpoint` to ensure exactly-once processing.
 
 5. **Data Retrieval & Visualization**
-   - The Express backend fetches processed data from HDFS.
+   - The Express backend fetches processed data from the 2 Kafka topics.
+   - 2 WebSockets are established between the Express backend and the React frontend each for each topic.
    - It exposes APIs for the frontend to consume.
    - Real-time updates are pushed to the dashboard using WebSockets.
    - The React frontend presents the data through interactive charts showing:
@@ -49,21 +67,7 @@ The Real-time Brand Monitor Analysis Platform works through a sophisticated pipe
      - Popular discussion topics.
      - Post volume metrics.
 
-This pipeline runs continuously, providing brand managers with up-to-date insights about Apple's social media presence on Reddit, enabling them to respond quickly to emerging trends or issues.
-
-## Architecture
-
-### Architecture Diagram
-
-![BDA Architecture](/assets/bda%20architecture%20sample.png)
-
-The architecture consists of several key components:
-
-- **Data Source**: Reddit API for streaming posts
-- **Message Broker**: Kafka for handling real-time data streams
-- **Processing Engine**: Spark for sentiment analysis and data transformations
-- **Storage**: HDFS for persistent data storage
-- **Visualization**: React frontend with Express backend for real-time dashboards
+This pipeline runs continuously, providing brand managers with up-to-date insights about Apple's social media presence on Reddit, enabling them to respond quickly to emerging trends or issues. The Pipeline can be improved with the addition of other social media platforms and also with addition of different brands for analysis and comparisons.
 
 ## Real-time Dashboard
 
