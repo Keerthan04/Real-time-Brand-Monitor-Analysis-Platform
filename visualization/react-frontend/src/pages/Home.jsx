@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { SentimentChart } from "../components/SentimentChart";
 import {PieChartComponent} from "../components/PieChartComponent";
 import {BarChartComponent} from "../components/BarChartComponent";
+import {TopicBarChartComponent} from "../components/TopicBarChartComponent";
 
 export default function Home() {
   //these state for sentiment area chart
@@ -22,7 +23,14 @@ export default function Home() {
   ]);
 
   //these states for barchart comparision of apple and samsung sentiments
-  const [wsDataBar, setWsDataBar] = useState([]); 
+  const [wsDataBar, setWsDataBar] = useState([]);
+
+  //these states for showing the top 5 topics of positive and negative sentiment for apple and samsung(neutral not taken into account)
+  const [ws1PositiveDataTopics, setWs1PositiveDataTopics] = useState([]);
+  const [ws2PositiveDataTopics, setWs2PositiveDataTopics] = useState([]);
+
+  const [ws1NegativeDataTopics, setWs1NegativeDataTopics] = useState([]);
+  const [ws2NegativeDataTopics, setWs2NegativeDataTopics] = useState([]);
 
 
   const [isWs1Ready, ws1Value] = useWs("ws://localhost:6002");
@@ -79,6 +87,7 @@ export default function Home() {
               ? { ...item, count: item.count + 1 }
               : item
           );
+
         });
 
         setWsDataBar((prev) => {
@@ -100,6 +109,89 @@ export default function Home() {
               : item
           );
         });
+
+        setWs1PositiveDataTopics((prev) => {
+          // 1) If `prev` is empty, start fresh with an empty array.
+          const initial= [];
+          const current = prev?.length ? [...prev] : initial;
+
+          // 2) Filter the incoming topics for "positive" only and of "apple".
+          const positiveTopics = jsonData.topics.filter(
+            (t) => t.sentiment.toLowerCase() === "positive" && t.topic.toLowerCase() === "apple"
+          );
+
+          // 3) For each positive topic, update or insert its mention_count in `current`.
+          positiveTopics.forEach((pt) => {
+            const topicKey = pt.topic.toLowerCase();
+            // Look for an existing topic in current state.
+            const existingIndex = current.findIndex(
+              (item) => item.topic === topicKey
+            );
+
+            if (existingIndex >= 0) {
+              // Update the existing topic's count
+              current[existingIndex] = {
+                ...current[existingIndex],
+                count: current[existingIndex].count + pt.mention_count,
+              };
+            } else {
+              // Insert a new topic with its mention_count
+              current.push({
+                topic: topicKey,
+                count: pt.mention_count,
+              });
+            }
+          });
+
+          // 4) Sort descending by `count` and keep only top 5.
+          current.sort((a, b) => b.count - a.count);
+          const top5 = current.slice(0, 5);
+
+          return top5;
+        });
+
+        setWs1NegativeDataTopics((prev) => {
+          // 1) If `prev` is empty, start fresh with an empty array.
+          const initial = [];
+          const current = prev?.length ? [...prev] : initial;
+
+          // 2) Filter the incoming topics for "positive" only and of "apple".
+          const positiveTopics = jsonData.topics.filter(
+            (t) =>
+              t.sentiment.toLowerCase() === "negative" &&
+              t.topic.toLowerCase() === "apple"
+          );
+
+          // 3) For each positive topic, update or insert its mention_count in `current`.
+          positiveTopics.forEach((pt) => {
+            const topicKey = pt.topic.toLowerCase();
+            // Look for an existing topic in current state.
+            const existingIndex = current.findIndex(
+              (item) => item.topic === topicKey
+            );
+
+            if (existingIndex >= 0) {
+              // Update the existing topic's count
+              current[existingIndex] = {
+                ...current[existingIndex],
+                count: current[existingIndex].count + pt.mention_count,
+              };
+            } else {
+              // Insert a new topic with its mention_count
+              current.push({
+                topic: topicKey,
+                count: pt.mention_count,
+              });
+            }
+          });
+
+          // 4) Sort descending by `count` and keep only top 5.
+          current.sort((a, b) => b.count - a.count);
+          const top5 = current.slice(0, 5);
+
+          return top5;
+        });
+
       } catch (error) {
         console.error("Error parsing JSON from ws1:", error);
       }
@@ -180,11 +272,95 @@ export default function Home() {
               : item
           );
         });
+
+        setWs2PositiveDataTopics((prev) => {
+          // 1) If `prev` is empty, start fresh with an empty array.
+          const initial = [];
+          const current = prev?.length ? [...prev] : initial;
+
+          // 2) Filter the incoming topics for "positive" only and of "samsung".
+          const positiveTopics = jsonData.topics.filter(
+            (t) =>
+              t.sentiment.toLowerCase() === "positive" &&
+              t.topic.toLowerCase() === "samsung"
+          );
+
+          // 3) For each positive topic, update or insert its mention_count in `current`.
+          positiveTopics.forEach((pt) => {
+            const topicKey = pt.topic.toLowerCase();
+            // Look for an existing topic in current state.
+            const existingIndex = current.findIndex(
+              (item) => item.topic === topicKey
+            );
+
+            if (existingIndex >= 0) {
+              // Update the existing topic's count
+              current[existingIndex] = {
+                ...current[existingIndex],
+                count: current[existingIndex].count + pt.mention_count,
+              };
+            } else {
+              // Insert a new topic with its mention_count
+              current.push({
+                topic: topicKey,
+                count: pt.mention_count,
+              });
+            }
+          });
+
+          // 4) Sort descending by `count` and keep only top 5.
+          current.sort((a, b) => b.count - a.count);
+          const top5 = current.slice(0, 5);
+
+          return top5;
+        });
+
+        setWs2NegativeDataTopics((prev) => {
+          // 1) If `prev` is empty, start fresh with an empty array.
+          const initial = [];
+          const current = prev?.length ? [...prev] : initial;
+
+          // 2) Filter the incoming topics for "positive" only and of "apple".
+          const positiveTopics = jsonData.topics.filter(
+            (t) =>
+              t.sentiment.toLowerCase() === "negative" &&
+              t.topic.toLowerCase() === "samsung"
+          );
+
+          // 3) For each positive topic, update or insert its mention_count in `current`.
+          positiveTopics.forEach((pt) => {
+            const topicKey = pt.topic.toLowerCase();
+            // Look for an existing topic in current state.
+            const existingIndex = current.findIndex(
+              (item) => item.topic === topicKey
+            );
+
+            if (existingIndex >= 0) {
+              // Update the existing topic's count
+              current[existingIndex] = {
+                ...current[existingIndex],
+                count: current[existingIndex].count + pt.mention_count,
+              };
+            } else {
+              // Insert a new topic with its mention_count
+              current.push({
+                topic: topicKey,
+                count: pt.mention_count,
+              });
+            }
+          });
+
+          // 4) Sort descending by `count` and keep only top 5.
+          current.sort((a, b) => b.count - a.count);
+          const top5 = current.slice(0, 5);
+
+          return top5;
+        });
       } catch (error) {
         console.error("Error parsing JSON from ws2:", error);
       }
     }
-  }, [isWs2Ready, ws2Value]);
+  }, [isWs2Ready, ws2Value, ws1Data, ws2Data, wsDataBar, ws1PositiveDataTopics, ws2PositiveDataTopics, ws1NegativeDataTopics, ws2NegativeDataTopics]);
 
 
   return (
@@ -216,11 +392,44 @@ export default function Home() {
           </div>
         </div>
         <div className="flex flex-col">
-          <h5 className="text-xl pl-4 ml-2 font-bold">
-            Bar Chart Comparison
-          </h5>
+          <h5 className="text-xl pl-4 ml-2 font-bold">Bar Chart Comparison</h5>
           <div className="p-4">
-            <BarChartComponent data={wsDataBar}/>
+            <BarChartComponent data={wsDataBar} />
+          </div>
+        </div>
+        <div className="flex flex-col">
+          <h5 className="text-md w-full text-center pl-4 ml-2 font-bold">
+            Reddit Posts Topic Wise Comparison
+          </h5>
+          <h5 className="text-md pl-4 ml-2 font-bold">
+            Positive Topics Comparison
+          </h5>
+          <div className="p-4  flex justify-between gap-4">
+            <TopicBarChartComponent
+              data={ws1PositiveDataTopics}
+              sentiment="positive"
+              company="Apple"
+            />
+            <TopicBarChartComponent
+              data={ws2PositiveDataTopics}
+              sentiment="positive"
+              company="Samsung"
+            />
+          </div>
+          <h5 className="text-md pl-4 ml-2 font-bold">
+            Negative Topics Comparison
+          </h5>
+          <div className="p-4 flex  justify-between gap-4">
+            <TopicBarChartComponent
+              data={ws1NegativeDataTopics}
+              sentiment="negative"
+              company="Apple"
+            />
+            <TopicBarChartComponent
+              data={ws2NegativeDataTopics}
+              sentiment="negative"
+              company="Samsung"
+            />
           </div>
         </div>
       </div>
