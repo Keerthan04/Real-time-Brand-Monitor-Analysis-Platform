@@ -47,6 +47,7 @@ services:
 
   sentimenet-flask:
     container_name: sentiment-flask
-    image: keerthankumarc/sentiment-flask-app:latest
+    # image: keerthankumarc/sentiment-flask-app:latest
+    image: sentimenet-flask-app
     ports:
       - "5000:5000"

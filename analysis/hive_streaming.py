@@ -155,9 +155,21 @@ def process_batch(batch_df, batch_id):
             .mode("append") \
             .parquet(f"/user/project/storage")
         
-        # Write to HIVE table
-        final.write \
-            .insertInto("brand_sentiment", overwrite=False)
+        # # Write to HIVE table
+        # final.write \
+        #     .insertInto("project.brand_sentiment", overwrite=False)
+        # Register the DataFrame as a temporary view
+        final.createOrReplaceTempView("processed_data")
+
+        # Insert the processed data into the Hive table using SQL
+        insert_sql = """
+        INSERT INTO project.brand_sentiment 
+        SELECT id, title, score, subreddit, url, content, sentiment_class, sentiment, topics, processed_timestamp, brand, year, month, day
+        FROM processed_data
+        """
+        
+        # Execute the SQL insert
+        spark.sql(insert_sql)
         
         # Prepare data for Kafka by converting the row to JSON
         # Split the data based on brand

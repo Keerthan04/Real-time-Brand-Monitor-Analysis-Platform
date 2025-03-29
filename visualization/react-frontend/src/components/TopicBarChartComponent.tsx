@@ -39,17 +39,17 @@ const chartConfig = {
 export function TopicBarChartComponent({ data, sentiment , company }: { data?: BarChartData[],sentiment: string,company: "Apple" | "Samsung" }) {
   return (
     <>
-      <Card className="flex flex-col w-1/2">
+      <Card className="flex flex-col w-full">
         <CardHeader>
           <CardTitle>{company} Comparision</CardTitle>
           <CardDescription>
-            Shows the Top 5 {sentiment} topics for {company}
+            Shows the  {sentiment} sentiment comparision for general topics for {company}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer
             config={chartConfig}
-            className="mx-auto  max-h-[300px]"
+            className="mx-auto w-full max-h-[300px]"
           >
             <BarChart
               accessibilityLayer
@@ -88,7 +88,7 @@ export function TopicBarChartComponent({ data, sentiment , company }: { data?: B
                 tickLine={false}
                 tickMargin={10}
                 axisLine={false}
-                // tickFormatter={(value) => value.slice(0, 3)}
+                tickFormatter={(value) => value.slice(0, 20)}
               />
               <ChartTooltip
                 cursor={false}

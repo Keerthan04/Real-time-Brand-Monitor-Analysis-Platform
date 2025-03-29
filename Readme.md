@@ -73,14 +73,19 @@ This pipeline runs continuously, providing brand managers with up-to-date insigh
 
 The dashboard provides interactive visualizations of sentiment analysis results:
 
-- Dashboard View 1
-  ![Dashboard View 1](/assets/1.png)
-- Dashboard View 2
-  ![Dashboard View 2](/assets/2.png)
-- Dashboard View 3
-  ![Dashboard View 3](/assets/3.png)
-- Dashboard View 4
-  ![Dashboard View 4](/assets/4.png)
+### Dashboard Views Preview
+
+![Dashboard View 1](/assets/1.png)
+
+![Dashboard View 2](/assets/2.png)
+
+![Dashboard View 3](/assets/3.png)
+
+![Dashboard View 4](/assets/4.png)
+
+![Dashboard View 5](/assets/6.png)
+
+![Dashboard View 6](/assets/5.png)
 
 ## Installation & Setup
 

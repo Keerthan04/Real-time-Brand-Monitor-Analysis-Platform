@@ -41,6 +41,7 @@ export default function Home() {
     if (isWs1Ready && ws1Value) {
       try {
         const jsonData = JSON.parse(ws1Value);
+        console.log(jsonData);
         setWs1Data((prev) => {
           // If empty, start fresh with 0 for each sentiment
           const lastItem = prev[prev.length - 1] ?? {
@@ -114,84 +115,92 @@ export default function Home() {
           // 1) If `prev` is empty, start fresh with an empty array.
           const initial= [];
           const current = prev?.length ? [...prev] : initial;
-
-          // 2) Filter the incoming topics for "positive" only and of "apple".
-          const positiveTopics = jsonData.topics.filter(
-            (t) => t.sentiment.toLowerCase() === "positive" && t.topic.toLowerCase() === "apple"
-          );
-
-          // 3) For each positive topic, update or insert its mention_count in `current`.
-          positiveTopics.forEach((pt) => {
-            const topicKey = pt.topic.toLowerCase();
-            // Look for an existing topic in current state.
-            const existingIndex = current.findIndex(
-              (item) => item.topic === topicKey
+          try {
+            const topicsArray = JSON.parse(jsonData.topics);
+            // 2) Filter the incoming topics for "positive" only and of "apple".
+            const positiveTopics = topicsArray.filter(
+              (t) => t.sentiment.toLowerCase() === "positive"
             );
 
-            if (existingIndex >= 0) {
-              // Update the existing topic's count
-              current[existingIndex] = {
-                ...current[existingIndex],
-                count: current[existingIndex].count + pt.mention_count,
-              };
-            } else {
-              // Insert a new topic with its mention_count
-              current.push({
-                topic: topicKey,
-                count: pt.mention_count,
-              });
-            }
-          });
+            // 3) For each positive topic, update or insert its mention_count in `current`.
+            positiveTopics.forEach((pt) => {
+              const topicKey = pt.topic.toLowerCase();
+              // Look for an existing topic in current state.
+              const existingIndex = current.findIndex(
+                (item) => item.topic === topicKey
+              );
 
-          // 4) Sort descending by `count` and keep only top 5.
-          current.sort((a, b) => b.count - a.count);
-          const top5 = current.slice(0, 5);
+              if (existingIndex >= 0) {
+                // Update the existing topic's count
+                current[existingIndex] = {
+                  ...current[existingIndex],
+                  count: current[existingIndex].count + pt.mention_count,
+                };
+              } else {
+                // Insert a new topic with its mention_count
+                current.push({
+                  topic: topicKey,
+                  count: pt.mention_count,
+                });
+              }
+            });
 
-          return top5;
+            // 4) Sort descending by `count` and keep only top 5.
+            current.sort((a, b) => b.count - a.count);
+            const top5 = current.slice(0, 5);
+
+            return top5;
+          } catch (error) {
+            console.error("Error parsing JSON from ws1:", error);
+            return current;
+          }
         });
 
         setWs1NegativeDataTopics((prev) => {
           // 1) If `prev` is empty, start fresh with an empty array.
           const initial = [];
           const current = prev?.length ? [...prev] : initial;
-
-          // 2) Filter the incoming topics for "positive" only and of "apple".
-          const positiveTopics = jsonData.topics.filter(
-            (t) =>
-              t.sentiment.toLowerCase() === "negative" &&
-              t.topic.toLowerCase() === "apple"
-          );
-
-          // 3) For each positive topic, update or insert its mention_count in `current`.
-          positiveTopics.forEach((pt) => {
-            const topicKey = pt.topic.toLowerCase();
-            // Look for an existing topic in current state.
-            const existingIndex = current.findIndex(
-              (item) => item.topic === topicKey
+          try {
+            const topicsArray = JSON.parse(jsonData.topics);
+            // 2) Filter the incoming topics for "positive" only and of "apple".
+            const negativeTopics = topicsArray.filter(
+              (t) => t.sentiment.toLowerCase() === "negative"
             );
 
-            if (existingIndex >= 0) {
-              // Update the existing topic's count
-              current[existingIndex] = {
-                ...current[existingIndex],
-                count: current[existingIndex].count + pt.mention_count,
-              };
-            } else {
-              // Insert a new topic with its mention_count
-              current.push({
-                topic: topicKey,
-                count: pt.mention_count,
-              });
-            }
-          });
+            // 3) For each positive topic, update or insert its mention_count in `current`.
+            negativeTopics.forEach((pt) => {
+              const topicKey = pt.topic.toLowerCase();
+              // Look for an existing topic in current state.
+              const existingIndex = current.findIndex(
+                (item) => item.topic === topicKey
+              );
 
-          // 4) Sort descending by `count` and keep only top 5.
-          current.sort((a, b) => b.count - a.count);
-          const top5 = current.slice(0, 5);
+              if (existingIndex >= 0) {
+                // Update the existing topic's count
+                current[existingIndex] = {
+                  ...current[existingIndex],
+                  count: current[existingIndex].count + pt.mention_count,
+                };
+              } else {
+                // Insert a new topic with its mention_count
+                current.push({
+                  topic: topicKey,
+                  count: pt.mention_count,
+                });
+              }
+            });
 
-          return top5;
+            // 4) Sort descending by `count` and keep only top 5.
+            current.sort((a, b) => b.count - a.count);
+            const top5 = current.slice(0, 5);
+
+            return top5;
+          } catch (error) {
+            console.error("Error parsing JSON from ws1:", error);
+            return current;
+          }
         });
-
+        
       } catch (error) {
         console.error("Error parsing JSON from ws1:", error);
       }
@@ -277,90 +286,97 @@ export default function Home() {
           // 1) If `prev` is empty, start fresh with an empty array.
           const initial = [];
           const current = prev?.length ? [...prev] : initial;
-
-          // 2) Filter the incoming topics for "positive" only and of "samsung".
-          const positiveTopics = jsonData.topics.filter(
-            (t) =>
-              t.sentiment.toLowerCase() === "positive" &&
-              t.topic.toLowerCase() === "samsung"
-          );
-
-          // 3) For each positive topic, update or insert its mention_count in `current`.
-          positiveTopics.forEach((pt) => {
-            const topicKey = pt.topic.toLowerCase();
-            // Look for an existing topic in current state.
-            const existingIndex = current.findIndex(
-              (item) => item.topic === topicKey
+          try {
+            const topicsArray = JSON.parse(jsonData.topics);
+            // 2) Filter the incoming topics for "positive" only and of "samsung".
+            const positiveTopics = topicsArray.filter(
+              (t) => t.sentiment.toLowerCase() === "positive"
             );
 
-            if (existingIndex >= 0) {
-              // Update the existing topic's count
-              current[existingIndex] = {
-                ...current[existingIndex],
-                count: current[existingIndex].count + pt.mention_count,
-              };
-            } else {
-              // Insert a new topic with its mention_count
-              current.push({
-                topic: topicKey,
-                count: pt.mention_count,
-              });
-            }
-          });
+            // 3) For each positive topic, update or insert its mention_count in `current`.
+            positiveTopics.forEach((pt) => {
+              const topicKey = pt.topic.toLowerCase();
+              // Look for an existing topic in current state.
+              const existingIndex = current.findIndex(
+                (item) => item.topic === topicKey
+              );
 
-          // 4) Sort descending by `count` and keep only top 5.
-          current.sort((a, b) => b.count - a.count);
-          const top5 = current.slice(0, 5);
+              if (existingIndex >= 0) {
+                // Update the existing topic's count
+                current[existingIndex] = {
+                  ...current[existingIndex],
+                  count: current[existingIndex].count + pt.mention_count,
+                };
+              } else {
+                // Insert a new topic with its mention_count
+                current.push({
+                  topic: topicKey,
+                  count: pt.mention_count,
+                });
+              }
+            });
 
-          return top5;
+            // 4) Sort descending by `count` and keep only top 5.
+            current.sort((a, b) => b.count - a.count);
+            const top5 = current.slice(0, 5);
+
+            return top5;
+          } catch (error) {
+            console.error("Error parsing JSON from ws2:", error);
+            return current;
+          }
         });
 
         setWs2NegativeDataTopics((prev) => {
           // 1) If `prev` is empty, start fresh with an empty array.
           const initial = [];
           const current = prev?.length ? [...prev] : initial;
-
-          // 2) Filter the incoming topics for "positive" only and of "apple".
-          const positiveTopics = jsonData.topics.filter(
-            (t) =>
-              t.sentiment.toLowerCase() === "negative" &&
-              t.topic.toLowerCase() === "samsung"
-          );
-
-          // 3) For each positive topic, update or insert its mention_count in `current`.
-          positiveTopics.forEach((pt) => {
-            const topicKey = pt.topic.toLowerCase();
-            // Look for an existing topic in current state.
-            const existingIndex = current.findIndex(
-              (item) => item.topic === topicKey
+          try {
+            const topicsArray = JSON.parse(jsonData.topics);
+            // 2) Filter the incoming topics for "positive" only and of "apple".
+            const negativeTopics = topicsArray.filter(
+              (t) =>
+                t.sentiment.toLowerCase() === "negative"
             );
 
-            if (existingIndex >= 0) {
-              // Update the existing topic's count
-              current[existingIndex] = {
-                ...current[existingIndex],
-                count: current[existingIndex].count + pt.mention_count,
-              };
-            } else {
-              // Insert a new topic with its mention_count
-              current.push({
-                topic: topicKey,
-                count: pt.mention_count,
-              });
-            }
-          });
+            // 3) For each positive topic, update or insert its mention_count in `current`.
+            negativeTopics.forEach((pt) => {
+              const topicKey = pt.topic.toLowerCase();
+              // Look for an existing topic in current state.
+              const existingIndex = current.findIndex(
+                (item) => item.topic === topicKey
+              );
 
-          // 4) Sort descending by `count` and keep only top 5.
-          current.sort((a, b) => b.count - a.count);
-          const top5 = current.slice(0, 5);
+              if (existingIndex >= 0) {
+                // Update the existing topic's count
+                current[existingIndex] = {
+                  ...current[existingIndex],
+                  count: current[existingIndex].count + pt.mention_count,
+                };
+              } else {
+                // Insert a new topic with its mention_count
+                current.push({
+                  topic: topicKey,
+                  count: pt.mention_count,
+                });
+              }
+            });
 
-          return top5;
+            // 4) Sort descending by `count` and keep only top 5.
+            current.sort((a, b) => b.count - a.count);
+            const top5 = current.slice(0, 5);
+
+            return top5;  
+          } catch (error) {
+            console.error("Error parsing JSON from ws2:", error);
+            return current;
+          }
         });
       } catch (error) {
         console.error("Error parsing JSON from ws2:", error);
       }
     }
-  }, [isWs2Ready, ws2Value, ws1Data, ws2Data, wsDataBar, ws1PositiveDataTopics, ws2PositiveDataTopics, ws1NegativeDataTopics, ws2NegativeDataTopics]);
+  }, [isWs2Ready, ws2Value]);
 
 
   return (
@@ -404,7 +420,7 @@ export default function Home() {
           <h5 className="text-md pl-4 ml-2 font-bold">
             Positive Topics Comparison
           </h5>
-          <div className="p-4  flex justify-between gap-4">
+          <div className="p-4  flex flex-col items-center gap-4">
             <TopicBarChartComponent
               data={ws1PositiveDataTopics}
               sentiment="positive"
@@ -419,7 +435,7 @@ export default function Home() {
           <h5 className="text-md pl-4 ml-2 font-bold">
             Negative Topics Comparison
           </h5>
-          <div className="p-4 flex  justify-between gap-4">
+          <div className="p-4 flex flex-col items-center gap-4">
             <TopicBarChartComponent
               data={ws1NegativeDataTopics}
               sentiment="negative"

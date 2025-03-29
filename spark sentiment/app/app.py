@@ -103,23 +103,81 @@ def predict():
     ## Initialize the Google AI client
     # genai.configure(api_key = os.getenv('GENAI_API_KEY'))
     ai_client = genai.Client(api_key=os.getenv('GENAI_API_KEY'))
+    # prompt = f"""
+    # Given the following text: "{text}"
+
+    # Extract the key topics related to Apple brand reputation. Focus on areas such as product features (e.g., iPhone, MacBook, Apple Watch), design, performance, battery life, software quality, customer service, pricing, and overall user experience. For each topic, determine if the sentiment is positive, negative, or neutral (if possible), and indicate the strength or frequency of mentions if applicable.
+
+    # Return the output as a valid JSON array, following this schema:
+    # [
+    # {{
+    #     "topic": "string",
+    #     "sentiment": "positive/negative/neutral",
+    #     "mention_count": integer
+    # }},
+    # ...
+    # ]
+
+    # If the text does not contain clear topics, return an empty JSON array.
+    # """
+    # prompt = f"""
+    # Given the following text: "{text}"
+
+    # If the brand mentioned is Apple, extract the key topics related to Apple brand reputation. Focus on areas such as product features (e.g., iPhone, MacBook, Apple Watch), design, performance, battery life, software quality, customer service, pricing, and overall user experience. For each topic, determine if the sentiment is positive, negative, or neutral (if possible), and indicate the strength or frequency of mentions if applicable.
+
+    # If the brand mentioned is Samsung, extract the key topics related to Samsung brand reputation, following the same areas of focus as for Apple (e.g., Galaxy phones, Samsung laptops, design, performance, battery life, software quality, customer service, pricing, and overall user experience). For each topic, determine if the sentiment is positive, negative, or neutral (if possible), and indicate the strength or frequency of mentions if applicable.
+
+    # If the text mentions neither Apple nor Samsung, return an empty JSON array.
+
+    # Return the output as a valid JSON array, following this schema:
+    # [
+    # {{
+    #     "topic": "string",
+    #     "sentiment": "positive/negative/neutral",
+    #     "mention_count": integer
+    # }},
+    # ...
+    # ]
+
+    # If no clear topics can be extracted for the brand, return an empty JSON array.
+    # """
     prompt = f"""
     Given the following text: "{text}"
 
-    Extract the key topics related to Apple brand reputation. Focus on areas such as product features (e.g., iPhone, MacBook, Apple Watch), design, performance, battery life, software quality, customer service, pricing, and overall user experience. For each topic, determine if the sentiment is positive, negative, or neutral (if possible), and indicate the strength or frequency of mentions if applicable.
+    First determine if the brand mentioned is Apple, Samsung, both, or neither.
+
+    Extract sentiment about the mentioned brand(s) and categorize it into ONLY these predefined topics:
+
+    For Apple:
+    - Product Features (iPhone, iPad, MacBook, etc.)
+    - Design & Build Quality
+    - Performance & Speed
+    - Software & Ecosystem
+    - Value & Price
+
+    For Samsung:
+    - Product Features (Galaxy phones, TVs, etc.)
+    - Design & Build Quality
+    - Performance & Speed
+    - Software & Experience
+    - Value & Price
+
+    For each topic that applies, determine if the sentiment is positive, negative, or neutral, and assign a mention count of 1 for each instance.
+
+    If the text mentions neither Apple nor Samsung, return an empty JSON array.
 
     Return the output as a valid JSON array, following this schema:
     [
     {{
-        "topic": "string",
+        "topic": "One of the predefined topics above only",
         "sentiment": "positive/negative/neutral",
-        "mention_count": integer
-    }},
-    ...
+        "mention_count": 1
+    }}
     ]
 
-    If the text does not contain clear topics, return an empty JSON array.
+    Only include topics that are actually mentioned in the text. If a predefined topic isn't discussed, don't include it in the output.
     """
+
     # ai_model = genai.GenerativeModel('gemini-2.0-flash')
     # response = ai_model.generate_content(prompt)
     response = ai_client.models.generate_content(
